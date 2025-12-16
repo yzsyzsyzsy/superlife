@@ -1,18 +1,16 @@
-/* ---------- Firebase 설정 ---------- */
+/* ---------- Firebase 설정 (절대 수정 X) ---------- */
 const firebaseConfig = {
-    apiKey: "AIzaSyBRtzAMf8hxhZAUEjvETl9YJ6q7ep1NZhY",
-    authDomain: "superlife-5b39e.firebaseapp.com",
-    projectId: "superlife-5b39e",
-    storageBucket: "superlife-5b39e.firebasestorage.app",
-    messagingSenderId: "579164716910",
-    appId: "1:579164716910:web:47584c546afe7fc18acb7f",
-    measurementId: "G-8D9T03SHBG"
+  apiKey: "AIzaSyBRtzAMf8hxhZAUEjvETl9YJ6q7ep1NZhY",
+  authDomain: "superlife-5b39e.firebaseapp.com",
+  projectId: "superlife-5b39e",
+  storageBucket: "superlife-5b39e.firebasestorage.app",
+  messagingSenderId: "579164716910",
+  appId: "1:579164716910:web:47584c546afe7fc18acb7f",
+  measurementId: "G-8D9T03SHBG"
 };
 
-/* Firebase 초기화 */
 firebase.initializeApp(firebaseConfig);
 
-/* Firebase 서비스 객체 */
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -28,7 +26,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-/* ---------- 데이터 로드 & 저장 ---------- */
+/* ---------- 데이터 ---------- */
 function loadData() {
   db.collection("users").doc(uid).get().then(doc => {
     userData = doc.exists ? doc.data() : {};
@@ -40,98 +38,159 @@ function saveData() {
   db.collection("users").doc(uid).set(userData);
 }
 
-/* ---------- 화면 ---------- */
+/* ---------- 페이지 ---------- */
 const content = document.getElementById("content");
 
 function showPage(page) {
-  if (page === "asset") assetPage();
-  if (page === "job") jobPage();
-  if (page === "todo") todoPage();
-  if (page === "habit") habitPage();
+  if (page === "asset") renderAsset();
+  if (page === "job") renderJob();
+  if (page === "todo") renderTodo();
+  if (page === "habit") renderHabit();
 }
 
 /* ---------- 자산 ---------- */
-function assetPage() {
+function renderAsset() {
+  userData.asset ||= { savings:"", living:"" };
+
   content.innerHTML = `
     <h3>자산</h3>
-    <input placeholder="현재 자산"
-      value="${userData.money || ""}"
-      oninput="userData.money=this.value; saveData();">
+
+    <div class="card">
+      <label>💰 목돈</label>
+      <input value="${userData.asset.savings}"
+        oninput="userData.asset.savings=this.value; saveData()">
+    </div>
+
+    <div class="card">
+      <label>🧾 생활금</label>
+      <input value="${userData.asset.living}"
+        oninput="userData.asset.living=this.value; saveData()">
+    </div>
   `;
 }
 
 /* ---------- 알바 ---------- */
-function jobPage() {
+function renderJob() {
   userData.jobs ||= [];
+
   content.innerHTML = `
     <h3>알바</h3>
-    <input id="job" placeholder="알바 내용">
-    <input id="pay" placeholder="금액">
-    <button onclick="addJob()">추가</button>
-    ${userData.jobs.map(j => `<div class="item">${j}</div>`).join("")}
+
+    <div class="card">
+      <input id="jobName" placeholder="알바 이름">
+      <input id="jobPlace" placeholder="위치">
+      <input id="jobTime" placeholder="시간">
+      <button onclick="addJob()">추가</button>
+    </div>
+
+    ${userData.jobs.map((j,i)=>`
+      <div class="card">
+        <strong>${j.name}</strong><br>
+        📍 ${j.place}<br>
+        ⏰ ${j.time}
+        <button onclick="deleteJob(${i})">삭제</button>
+      </div>
+    `).join("")}
   `;
 }
 
 function addJob() {
-  const j = document.getElementById("job").value;
-  const p = document.getElementById("pay").value;
-  if (j && p) {
-    userData.jobs.push(`${j} - ${p}원`);
+  if (jobName.value && jobPlace.value && jobTime.value) {
+    userData.jobs.push({
+      name: jobName.value,
+      place: jobPlace.value,
+      time: jobTime.value
+    });
     saveData();
-    jobPage();
+    renderJob();
   }
 }
 
-/* ---------- 할 일 ---------- */
-function todoPage() {
+function deleteJob(i) {
+  userData.jobs.splice(i,1);
+  saveData();
+  renderJob();
+}
+
+/* ---------- do it ---------- */
+function renderTodo() {
   userData.todos ||= [];
+
   content.innerHTML = `
-    <h3>할 일</h3>
-    <input id="todo" placeholder="할 일">
-    <button onclick="addTodo()">추가</button>
+    <h3>do it</h3>
+
+    <div class="hero"></div>
+
+    <div class="card">
+      <input id="todoInput" placeholder="오늘 반드시 할 것">
+      <button onclick="addTodo()">추가</button>
+    </div>
+
     ${userData.todos.map((t,i)=>`
-      <div class="item">
-        <input type="checkbox" onchange="removeTodo(${i})"> ${t}
-      </div>`).join("")}
+      <div class="card todo ${t.done ? "done" : ""}"
+           onclick="toggleTodo(${i})">
+        ${t.text}
+        <button onclick="deleteTodo(${i});event.stopPropagation()">삭제</button>
+      </div>
+    `).join("")}
   `;
 }
 
 function addTodo() {
-  const todo = document.getElementById("todo").value;
-  if (todo) {
-    userData.todos.push(todo);
+  if (todoInput.value) {
+    userData.todos.push({ text: todoInput.value, done:false });
     saveData();
-    todoPage();
+    renderTodo();
   }
 }
 
-function removeTodo(i) {
+function toggleTodo(i) {
+  userData.todos[i].done = !userData.todos[i].done;
+  saveData();
+  renderTodo();
+}
+
+function deleteTodo(i) {
   userData.todos.splice(i,1);
   saveData();
-  todoPage();
+  renderTodo();
 }
 
 /* ---------- 매일 ---------- */
-function habitPage() {
+function renderHabit() {
   userData.habits ||= [];
+
   content.innerHTML = `
     <h3>매일</h3>
-    <input id="habit" placeholder="습관">
-    <button onclick="addHabit()">추가</button>
-    ${userData.habits.map(h => `<div class="item">✅ ${h}</div>`).join("")}
+
+    <div class="card">
+      <input id="habitInput" placeholder="매일 할 습관">
+      <button onclick="addHabit()">추가</button>
+    </div>
+
+    ${userData.habits.map((h,i)=>`
+      <div class="card">✅ ${h}
+        <button onclick="deleteHabit(${i})">삭제</button>
+      </div>
+    `).join("")}
   `;
 }
 
 function addHabit() {
-  const habit = document.getElementById("habit").value;
-  if (habit) {
-    userData.habits.push(habit);
+  if (habitInput.value) {
+    userData.habits.push(habitInput.value);
     saveData();
-    habitPage();
+    renderHabit();
   }
 }
 
-/* ---------- Service Worker 등록 ---------- */
+function deleteHabit(i) {
+  userData.habits.splice(i,1);
+  saveData();
+  renderHabit();
+}
+
+/* ---------- SW ---------- */
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
