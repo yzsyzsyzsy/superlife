@@ -1,48 +1,89 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont;
-  background: #f2f2f7;
+  background: linear-gradient(180deg, #0d0d10, #1a1a22);
+  color: white;
 }
 
 header {
-  padding: 16px;
+  padding: 18px;
   text-align: center;
   font-weight: 700;
-  background: white;
-  border-bottom: 1px solid #ddd;
+  background: linear-gradient(180deg, #1f1f28, #0f0f14);
 }
 
 main {
   padding: 16px;
-  padding-bottom: 90px;
+  padding-bottom: 120px;
 }
 
+h3 {
+  margin-bottom: 12px;
+}
+
+/* 카드 */
+.card {
+  background: linear-gradient(145deg, #1f1f29, #14141b);
+  border-radius: 18px;
+  padding: 16px;
+  margin-top: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+/* do it 카드 */
+.todo {
+  cursor: pointer;
+}
+
+.todo.done {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* 입력 */
+input {
+  width: 100%;
+  background: #0d0d12;
+  border: 1px solid #2a2a35;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 10px;
+  color: white;
+}
+
+/* 버튼 */
+button {
+  width: 100%;
+  background: linear-gradient(180deg, #2c2c36, #1b1b23);
+  border: none;
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 10px;
+  color: white;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* 하단 */
 nav {
   position: fixed;
   bottom: 0;
   width: 100%;
   display: flex;
-  background: white;
-  border-top: 1px solid #ddd;
+  background: #0f0f14;
 }
 
 nav button {
   flex: 1;
-  padding: 12px;
-  border: none;
   background: none;
-  font-size: 14px;
 }
 
-input, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-}
-
-.item {
-  background: white;
-  padding: 14px;
-  margin-top: 8px;
-  border-radius: 12px;
+/* hero 이미지 */
+.hero {
+  height: 140px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2a2a38, #0f0f14);
+  margin-bottom: 16px;
 }
